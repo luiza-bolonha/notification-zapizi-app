@@ -1,10 +1,4 @@
-# flutter_project_model
-
-Configurado:
-- Controle de telas
-- View; Controller; Repository; (Getx)
-- Base do consumo de API (retrofit)
-- Base do style
+# notification-zapizi-app
 
 ## Getting Started
 
