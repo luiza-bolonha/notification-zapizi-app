@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../global/widget/bottom_button.dart';
 import '../../../global/widget/custom_text_form_field.dart';
+import '../../main/main_routes.dart';
 
 class AuthView extends StatefulWidget {
   const AuthView({super.key});
@@ -62,6 +63,7 @@ class _AuthViewState extends State<AuthView> {
                   onPressed: () async {
                     FocusScope.of(context).unfocus();
                     store.login();
+                    Get.toNamed(MainRoutes.home);
                   },
                 )
               ],

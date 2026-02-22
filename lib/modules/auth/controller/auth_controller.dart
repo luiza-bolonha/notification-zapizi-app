@@ -5,6 +5,7 @@ import 'package:flutter_project_model/data/repositories/auth_repository.dart';
 import 'package:get/get.dart';
 
 import '../../../data/dto/login_dto.dart';
+import '../../../global/snackbar.dart';
 
 class AuthController extends GetxController{
 
@@ -34,15 +35,5 @@ class AuthController extends GetxController{
         snackBar(e.response?.data['message'] ?? "Erro ao realizar login");
       }
     }
-  }
-
-  void snackBar(String msg, {String title = 'Atenção'}){
-    Get.snackbar(
-      title,
-      msg,
-      snackPosition: SnackPosition.TOP,
-      duration: const Duration(seconds: 4),
-      backgroundColor: Colors.white
-    );
   }
 }
