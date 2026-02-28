@@ -1,4 +1,115 @@
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+import '../data/bar_category.dart';
+import '../data/bar_group.dart';
+import '../data/bar_value.dart';
+
+class CustomBarChart extends StatelessWidget {
+  final List<BarGroup> groups;
+  final List<BarCategory> categories;
+
+  const CustomBarChart({
+    super.key,
+    required this.groups,
+    required this.categories,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return BarChart(
+      BarChartData(
+        barGroups: _buildGroups(),
+        titlesData: _titles(),
+        gridData: _grid(),
+        borderData: FlBorderData(show: false),
+      ),
+    );
+  }
+
+  List<BarChartGroupData> _buildGroups() {
+    return List.generate(groups.length, (i) {
+      final group = groups[i];
+
+      double current = 0;
+      final stack = <BarChartRodStackItem>[];
+
+      for (final category in categories) {
+        final value = group.values
+            .firstWhere(
+              (e) => e.category == category.name,
+          orElse: () => BarValue(category: category.name, value: 0),
+        )
+            .value;
+
+        stack.add(
+          BarChartRodStackItem(
+            current,
+            current + value,
+            category.color,
+          ),
+        );
+
+        current += value;
+      }
+
+      return BarChartGroupData(
+        x: i,
+        barRods: [
+          BarChartRodData(
+            toY: current,
+            rodStackItems: stack,
+            width: 18,
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ],
+      );
+    });
+  }
+
+  FlTitlesData _titles() {
+    return FlTitlesData(
+      bottomTitles: AxisTitles(
+        sideTitles: SideTitles(
+          showTitles: true,
+          getTitlesWidget: (value, meta) {
+            final index = value.toInt();
+            if (index >= groups.length) return const SizedBox();
+
+            return Text(groups[index].label);
+          },
+        ),
+      ),
+      leftTitles: AxisTitles(
+        sideTitles: SideTitles(showTitles: true),
+      ),
+      rightTitles: const AxisTitles(
+        sideTitles: SideTitles(showTitles: false),
+      ),
+      topTitles: const AxisTitles(
+        sideTitles: SideTitles(showTitles: false),
+      ),
+    );
+  }
+
+  FlGridData _grid() {
+    return FlGridData(
+      drawVerticalLine: false,
+      getDrawingHorizontalLine: (value) {
+        return FlLine(
+          color: Colors.white.withOpacity(0.1),
+          strokeWidth: 1,
+          dashArray: [5, 5],
+        );
+      },
+    );
+  }
+}
+
+
+/*
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 class CustomBarChart extends StatefulWidget {
@@ -333,142 +444,5 @@ class CustomBarChartState extends State<CustomBarChart> {
         ],
       ),
     ];
-  }
-}
-
-/*
-import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter/material.dart';
-
-class CustomBarChart extends StatelessWidget {
-  const CustomBarChart({super.key});
-
-  final pilateColor = Colors.purple;
-  final cyclingColor = Colors.cyan;
-  final quickWorkoutColor = Colors.blue;
-  final betweenSpace = 0.2;
-
-  BarChartGroupData generateGroupData(
-      int x,
-      double pilates,
-      double quickWorkout,
-      double cycling,
-      ) {
-    return BarChartGroupData(
-      x: x,
-      groupVertically: true,
-      barRods: [
-        BarChartRodData(
-          fromY: 0,
-          toY: pilates,
-          color: pilateColor,
-          width: 5,
-        ),
-        BarChartRodData(
-          fromY: pilates + betweenSpace,
-          toY: pilates + betweenSpace + quickWorkout,
-          color: quickWorkoutColor,
-          width: 5,
-        ),
-        BarChartRodData(
-          fromY: pilates + betweenSpace + quickWorkout + betweenSpace,
-          toY: pilates + betweenSpace + quickWorkout + betweenSpace + cycling,
-          color: cyclingColor,
-          width: 5,
-        ),
-      ],
-    );
-  }
-
-  Widget bottomTitles(double value, TitleMeta meta) {
-    const style = TextStyle(fontSize: 10);
-    String text = switch (value.toInt()) {
-      0 => 'JAN',
-      1 => 'FEB',
-      2 => 'MAR',
-      3 => 'APR',
-      4 => 'MAY',
-      5 => 'JUN',
-      6 => 'JUL',
-      7 => 'AUG',
-      8 => 'SEP',
-      9 => 'OCT',
-      10 => 'NOV',
-      11 => 'DEC',
-      _ => '',
-    };
-    return SideTitleWidget(
-      meta: meta,
-      child: Text(text, style: style),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: AspectRatio(
-        aspectRatio: 2,
-        child: BarChart(
-          BarChartData(
-            alignment: BarChartAlignment.spaceBetween,
-            titlesData: FlTitlesData(
-              leftTitles: const AxisTitles(),
-              rightTitles: const AxisTitles(),
-              topTitles: const AxisTitles(),
-              bottomTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  getTitlesWidget: bottomTitles,
-                  reservedSize: 20,
-                ),
-              ),
-            ),
-            barTouchData: const BarTouchData(enabled: false),
-            borderData: FlBorderData(show: false),
-            gridData: const FlGridData(show: false),
-            barGroups: [
-              generateGroupData(0, 2, 3, 2),
-              generateGroupData(1, 2, 5, 1.7),
-              generateGroupData(2, 1.3, 3.1, 2.8),
-              generateGroupData(3, 3.1, 4, 3.1),
-              generateGroupData(4, 0.8, 3.3, 3.4),
-              generateGroupData(5, 2, 5.6, 1.8),
-              generateGroupData(6, 1.3, 3.2, 2),
-              generateGroupData(7, 2.3, 3.2, 3),
-              generateGroupData(8, 2, 4.8, 2.5),
-              generateGroupData(9, 1.2, 3.2, 2.5),
-              generateGroupData(10, 1, 4.8, 3),
-              generateGroupData(11, 2, 4.4, 2.8),
-            ],
-            maxY: 11 + (betweenSpace * 3),
-            */
-/*extraLinesData: ExtraLinesData(
-              horizontalLines: [
-                HorizontalLine(
-                  y: 3.3,
-                  color: pilateColor,
-                  strokeWidth: 1,
-                  dashArray: [20, 4],
-                ),
-                HorizontalLine(
-                  y: 8,
-                  color: quickWorkoutColor,
-                  strokeWidth: 1,
-                  dashArray: [20, 4],
-                ),
-                HorizontalLine(
-                  y: 11,
-                  color: cyclingColor,
-                  strokeWidth: 1,
-                  dashArray: [20, 4],
-                ),
-              ],
-            ),*//*
-
-          ),
-        ),
-      ),
-    );
   }
 }*/
