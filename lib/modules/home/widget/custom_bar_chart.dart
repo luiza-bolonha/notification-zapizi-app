@@ -7,24 +7,144 @@ import '../data/bar_group.dart';
 import '../data/bar_value.dart';
 
 class CustomBarChart extends StatelessWidget {
+  final String title;
   final List<BarGroup> groups;
   final List<BarCategory> categories;
 
   const CustomBarChart({
     super.key,
+    required this.title,
     required this.groups,
     required this.categories,
   });
 
+  double _getTotal(int index) {
+    if (index < 0 || index >= groups.length) return 0;
+    double total = 0;
+    for (final val in groups[index].values) {
+      total += val.value;
+    }
+    return total;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BarChart(
-      BarChartData(
-        barGroups: _buildGroups(),
-        titlesData: _titles(),
-        gridData: _grid(),
-        borderData: FlBorderData(show: false),
+    double maxTotal = 0;
+    for (int i = 0; i < groups.length; i++) {
+      final t = _getTotal(i);
+      if (t > maxTotal) maxTotal = t;
+    }
+    final yMax = maxTotal > 0 ? (maxTotal * 1.4) : 100000.0; // Espaço para os textos no topo
+
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.grey,
+        borderRadius: BorderRadius.all(Radius.circular(10)),
       ),
+      height: 350,
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildLegend(),
+            const SizedBox(height: 20),
+            Expanded(
+              child: BarChart(
+                BarChartData(
+                  alignment: BarChartAlignment.spaceAround,
+                  maxY: yMax,
+                  barTouchData: BarTouchData(
+                    enabled: false,
+                    touchTooltipData: BarTouchTooltipData(
+                      getTooltipColor: (group) => Colors.transparent,
+                      tooltipPadding: EdgeInsets.zero,
+                      tooltipMargin: 8,
+                      getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                        final currentTotal = rod.toY;
+                        final prevTotal = _getTotal(groupIndex - 1);
+
+                        String percentText = '';
+                        Color percentColor = Colors.transparent;
+
+                        if (groupIndex > 0 && prevTotal > 0) {
+                          final diff = currentTotal - prevTotal;
+                          final percent = (diff / prevTotal) * 100;
+                          if (percent > 0) {
+                            percentText = '▲+${percent.toStringAsFixed(0)}%';
+                            percentColor = Colors.greenAccent;
+                          } else if (percent < 0) {
+                            percentText = '▼${percent.toStringAsFixed(0)}%';
+                            percentColor = Colors.redAccent;
+                          }
+                        }
+
+                        // Formatar o valor total: ex: 467500 -> 467,5k
+                        String formattedTotal = 'R\$ ${(currentTotal / 1000).toStringAsFixed(1).replaceAll('.', ',')}k';
+                        if (formattedTotal.endsWith(',0k')) {
+                          formattedTotal = formattedTotal.replaceFirst(',0k', 'k');
+                        }
+
+                        return BarTooltipItem(
+                          percentText.isNotEmpty ? '$percentText\n' : '',
+                          TextStyle(
+                            color: percentColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 10,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: formattedTotal,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                  titlesData: _titles(yMax),
+                  gridData: _grid(),
+                  borderData: FlBorderData(show: false),
+                  barGroups: _buildGroups(),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLegend() {
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 16,
+      runSpacing: 12,
+      children: categories.map((category) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 12,
+              height: 12,
+              color: category.color,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              category.name,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        );
+      }).toList(),
     );
   }
 
@@ -43,46 +163,91 @@ class CustomBarChart extends StatelessWidget {
         )
             .value;
 
-        stack.add(
-          BarChartRodStackItem(
-            current,
-            current + value,
-            category.color,
-          ),
-        );
+        if (value > 0) {
+          stack.add(
+            BarChartRodStackItem(
+              current,
+              current + value,
+              category.color,
+            ),
+          );
+        }
 
         current += value;
       }
 
       return BarChartGroupData(
         x: i,
+        showingTooltipIndicators: [0], // Força a exibição do tooltip
         barRods: [
           BarChartRodData(
             toY: current,
             rodStackItems: stack,
-            width: 18,
-            borderRadius: BorderRadius.circular(4),
+            width: 24,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(2),
+              topRight: Radius.circular(2),
+            ),
           ),
         ],
       );
     });
   }
 
-  FlTitlesData _titles() {
+  FlTitlesData _titles(double yMax) {
     return FlTitlesData(
       bottomTitles: AxisTitles(
         sideTitles: SideTitles(
           showTitles: true,
+          reservedSize: 32,
           getTitlesWidget: (value, meta) {
             final index = value.toInt();
-            if (index >= groups.length) return const SizedBox();
+            if (index >= groups.length || index < 0) return const SizedBox();
 
-            return Text(groups[index].label);
+            return Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text(
+                groups[index].label,
+                style: const TextStyle(
+                  color: Colors.white54,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            );
           },
         ),
       ),
       leftTitles: AxisTitles(
-        sideTitles: SideTitles(showTitles: true),
+        sideTitles: SideTitles(
+          showTitles: true,
+          reservedSize: 60,
+          interval: 100000,
+          getTitlesWidget: (value, meta) {
+            // Não mostrar o valor máximo se ele for quebrado por conta do padding extra
+            if (value >= yMax * 0.95) {
+              return const SizedBox();
+            }
+            
+            String formatted = value.toInt().toString();
+            if (value >= 1000) {
+              formatted = '${(value / 1000).toInt()}.000';
+            }
+            if (value == 0) formatted = '0';
+            
+            return Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Text(
+                formatted,
+                style: const TextStyle(
+                  color: Colors.white54,
+                  fontSize: 12,
+                ),
+                textAlign: TextAlign.right,
+              ),
+            );
+          },
+        ),
       ),
       rightTitles: const AxisTitles(
         sideTitles: SideTitles(showTitles: false),
@@ -95,10 +260,12 @@ class CustomBarChart extends StatelessWidget {
 
   FlGridData _grid() {
     return FlGridData(
+      show: true,
       drawVerticalLine: false,
+      horizontalInterval: 100000,
       getDrawingHorizontalLine: (value) {
         return FlLine(
-          color: Colors.white.withOpacity(0.1),
+          color: Colors.white.withOpacity(0.05),
           strokeWidth: 1,
           dashArray: [5, 5],
         );

@@ -30,6 +30,14 @@ class _HomeViewState extends State<HomeView> {
   ];
 
   final data = [
+    BarGroup(label: "Jul", values: [
+      BarValue(category: "Cartão", value: 10000),
+      BarValue(category: "Pix", value: 300000),
+    ]),
+    BarGroup(label: "Ago", values: [
+      BarValue(category: "Dinheiro", value: 70000),
+      BarValue(category: "Débito", value: 300000),
+    ]),
     BarGroup(label: "Set", values: [
       BarValue(category: "Dinheiro", value: 70000),
       BarValue(category: "Pix", value: 300000),
@@ -40,6 +48,10 @@ class _HomeViewState extends State<HomeView> {
     ]),
     BarGroup(label: "Nov", values: [
       BarValue(category: "Dinheiro", value: 90000),
+      BarValue(category: "Pix", value: 305000),
+    ]),
+    BarGroup(label: "Dez", values: [
+      BarValue(category: "Dinheiro", value: 80000),
       BarValue(category: "Pix", value: 305000),
     ]),
   ];
@@ -58,7 +70,7 @@ class _HomeViewState extends State<HomeView> {
                 ),
                 PieChartItem(
                   label: "Shopping Vila Velha",
-                  value: 400,
+                  value: 40
                 ),
                 PieChartItem(
                   label: "Loja Marechal",
@@ -74,7 +86,9 @@ class _HomeViewState extends State<HomeView> {
                 ),
               ],
             ),
+            const SizedBox(height: 32),
             CustomBarChart(
+              title: 'Faturamento por Meio de Pagamento',
               categories: categories,
               groups: data,
             )

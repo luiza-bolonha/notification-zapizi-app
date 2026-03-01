@@ -32,14 +32,14 @@ class _CustomPieChartState extends State<CustomPieChart> {
       child: Column(
         children: [
           AspectRatio(
-            aspectRatio: 1.5,
+            aspectRatio: 1.2,
             child: Stack(
               alignment: Alignment.center,
               children: [
                 PieChart(
                   PieChartData(
                     sectionsSpace: 2,
-                    centerSpaceRadius: 70,
+                    centerSpaceRadius: 80,
                     pieTouchData: PieTouchData(
                       touchCallback: (event, response) {
                         setState(() {
