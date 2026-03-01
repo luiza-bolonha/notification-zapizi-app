@@ -34,12 +34,23 @@ class CustomBarChart extends StatelessWidget {
       final t = _getTotal(i);
       if (t > maxTotal) maxTotal = t;
     }
-    final yMax = maxTotal > 0 ? (maxTotal * 1.4) : 100000.0; // Espaço para os textos no topo
+    final yMax = maxTotal > 0 ? (maxTotal * 1.4) : 100000.0;
+
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final textColor = theme.textTheme.bodyMedium?.color ?? Colors.white;
 
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.grey,
-        borderRadius: BorderRadius.all(Radius.circular(10)),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF2A2A3D) : Colors.white,
+        borderRadius: const BorderRadius.all(Radius.circular(10)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       height: 350,
       child: Padding(
@@ -47,7 +58,7 @@ class CustomBarChart extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildLegend(),
+            _buildLegend(textColor),
             const SizedBox(height: 20),
             Expanded(
               child: BarChart(
@@ -106,8 +117,8 @@ class CustomBarChart extends StatelessWidget {
                       },
                     ),
                   ),
-                  titlesData: _titles(yMax),
-                  gridData: _grid(),
+                  titlesData: _titles(yMax, textColor),
+                  gridData: _grid(textColor),
                   borderData: FlBorderData(show: false),
                   barGroups: _buildGroups(),
                 ),
@@ -119,7 +130,7 @@ class CustomBarChart extends StatelessWidget {
     );
   }
 
-  Widget _buildLegend() {
+  Widget _buildLegend(Color textColor) {
     return Wrap(
       alignment: WrapAlignment.center,
       spacing: 16,
@@ -136,8 +147,8 @@ class CustomBarChart extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               category.name,
-              style: const TextStyle(
-                color: Colors.white70,
+              style: TextStyle(
+                color: textColor.withOpacity(0.8),
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
@@ -194,7 +205,7 @@ class CustomBarChart extends StatelessWidget {
     });
   }
 
-  FlTitlesData _titles(double yMax) {
+  FlTitlesData _titles(double yMax, Color textColor) {
     return FlTitlesData(
       bottomTitles: AxisTitles(
         sideTitles: SideTitles(
@@ -208,8 +219,8 @@ class CustomBarChart extends StatelessWidget {
               padding: const EdgeInsets.only(top: 8.0),
               child: Text(
                 groups[index].label,
-                style: const TextStyle(
-                  color: Colors.white54,
+                style: TextStyle(
+                  color: textColor.withOpacity(0.6),
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
                 ),
@@ -224,7 +235,6 @@ class CustomBarChart extends StatelessWidget {
           reservedSize: 60,
           interval: 100000,
           getTitlesWidget: (value, meta) {
-            // Não mostrar o valor máximo se ele for quebrado por conta do padding extra
             if (value >= yMax * 0.95) {
               return const SizedBox();
             }
@@ -239,8 +249,8 @@ class CustomBarChart extends StatelessWidget {
               padding: const EdgeInsets.only(right: 8.0),
               child: Text(
                 formatted,
-                style: const TextStyle(
-                  color: Colors.white54,
+                style: TextStyle(
+                  color: textColor.withOpacity(0.6),
                   fontSize: 12,
                 ),
                 textAlign: TextAlign.right,
@@ -258,14 +268,14 @@ class CustomBarChart extends StatelessWidget {
     );
   }
 
-  FlGridData _grid() {
+  FlGridData _grid(Color textColor) {
     return FlGridData(
       show: true,
       drawVerticalLine: false,
       horizontalInterval: 100000,
       getDrawingHorizontalLine: (value) {
         return FlLine(
-          color: Colors.white.withOpacity(0.05),
+          color: textColor.withOpacity(0.08),
           strokeWidth: 1,
           dashArray: [5, 5],
         );

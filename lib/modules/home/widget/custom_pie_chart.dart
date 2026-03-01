@@ -24,10 +24,21 @@ class _CustomPieChartState extends State<CustomPieChart> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final textColor = theme.textTheme.bodyMedium?.color ?? Colors.white;
+
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.grey,
-        borderRadius: BorderRadius.all(Radius.circular(10)),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF2A2A3D) : Colors.white,
+        borderRadius: const BorderRadius.all(Radius.circular(10)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -63,13 +74,14 @@ class _CustomPieChartState extends State<CustomPieChart> {
                     Text(
                       "Total",
                       style: TextStyle(
-                        color: Colors.grey,
+                        color: textColor.withOpacity(0.5),
                         fontSize: 14,
                       ),
                     ),
                     Text(
-                      "R\$ ${(total/1000).toStringAsFixed(1)}k",
+                      "R\$ ${(total / 1000).toStringAsFixed(1)}k",
                       style: TextStyle(
+                        color: textColor,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
@@ -80,7 +92,7 @@ class _CustomPieChartState extends State<CustomPieChart> {
             ),
           ),
           const SizedBox(height: 10),
-          DashedLine(color: Colors.white),
+          DashedLine(color: textColor.withOpacity(0.2)),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Wrap(
@@ -101,7 +113,10 @@ class _CustomPieChartState extends State<CustomPieChart> {
                       ),
                     ),
                     const SizedBox(width: 6),
-                    Text(e.label),
+                    Text(
+                      e.label,
+                      style: TextStyle(color: textColor, fontSize: 13),
+                    ),
                   ],
                 ),
               )
