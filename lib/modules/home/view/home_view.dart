@@ -22,40 +22,6 @@ class _HomeViewState extends State<HomeView> {
   final store = Get.find<AuthController>();
   final homeController = Get.put(HomeController());
 
-  final categories = [
-    BarCategory(name: "Dinheiro", color: Colors.green),
-    BarCategory(name: "Pix", color: Colors.amber),
-    BarCategory(name: "Venda Manual", color: Colors.cyan),
-    BarCategory(name: "Crédito", color: Colors.red),
-    BarCategory(name: "Débito", color: Colors.grey),
-  ];
-
-  final data = [
-    BarGroup(label: "Jul", values: [
-      BarValue(category: "Cartão", value: 10000),
-      BarValue(category: "Pix", value: 300000),
-    ]),
-    BarGroup(label: "Ago", values: [
-      BarValue(category: "Dinheiro", value: 70000),
-      BarValue(category: "Débito", value: 300000),
-    ]),
-    BarGroup(label: "Set", values: [
-      BarValue(category: "Dinheiro", value: 70000),
-      BarValue(category: "Pix", value: 300000),
-    ]),
-    BarGroup(label: "Out", values: [
-      BarValue(category: "Dinheiro", value: 75000),
-      BarValue(category: "Pix", value: 290000),
-    ]),
-    BarGroup(label: "Nov", values: [
-      BarValue(category: "Dinheiro", value: 90000),
-      BarValue(category: "Pix", value: 305000),
-    ]),
-    BarGroup(label: "Dez", values: [
-      BarValue(category: "Dinheiro", value: 80000),
-      BarValue(category: "Pix", value: 305000),
-    ]),
-  ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,36 +47,23 @@ class _HomeViewState extends State<HomeView> {
           padding: const EdgeInsets.all(12.0),
           child: Column(
             children: [
-            CustomPieChart(
-              data: [
-                PieChartItem(
-                  label: "Shopping Vitória",
-                  value: 500,
-                ),
-                PieChartItem(
-                  label: "Shopping Vila Velha",
-                  value: 40
-                ),
-                PieChartItem(
-                  label: "Loja Marechal",
-                  value: 300,
-                ),
-                PieChartItem(
-                  label: "Moxuara Loja",
-                  value: 200,
-                ),
-                PieChartItem(
-                  label: "Shopping Mestre Álvaro",
-                  value: 500,
-                ),
-              ],
-            ),
+            Obx(() {
+              if (homeController.pieData.isEmpty) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              return CustomPieChart(data: homeController.pieData.toList());
+            }),
             const SizedBox(height: 32),
-            CustomBarChart(
-              title: 'Faturamento por Meio de Pagamento',
-              categories: categories,
-              groups: data,
-            )
+            Obx(() {
+              if (homeController.barGroups.isEmpty) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              return CustomBarChart(
+                title: 'Faturamento por Meio de Pagamento',
+                categories: homeController.barCategories.toList(),
+                groups: homeController.barGroups.toList(),
+              );
+            }),
           ],
         ),
       ),

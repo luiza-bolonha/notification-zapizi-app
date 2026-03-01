@@ -1,7 +1,5 @@
 import 'dart:ui';
 
-import '../../../global/utils.dart';
-
 class PieChartItem {
   final String label;
   final double value;
@@ -10,5 +8,6 @@ class PieChartItem {
   PieChartItem({
     required this.label,
     required this.value,
-  }): color = randomColor();
+    required this.color,
+  });
 }
