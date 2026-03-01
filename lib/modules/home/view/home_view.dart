@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project_model/modules/auth/controller/auth_controller.dart';
+import 'package:flutter_project_model/modules/home/controller/home_controller.dart';
 import 'package:flutter_project_model/modules/home/widget/custom_bar_chart.dart';
 import 'package:flutter_project_model/modules/home/widget/custom_pie_chart.dart';
 import 'package:get/get.dart';
@@ -19,7 +20,7 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   final _formKey = GlobalKey<FormState>();
   final store = Get.find<AuthController>();
-
+  final homeController = Get.put(HomeController());
 
   final categories = [
     BarCategory(name: "Dinheiro", color: Colors.green),
@@ -58,10 +59,28 @@ class _HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          children: [
+      appBar: AppBar(
+        title: const Text('Dashboard'),
+        actions: [
+          Obx(
+            () => IconButton(
+              icon: Icon(
+                homeController.isDark.value
+                    ? Icons.light_mode
+                    : Icons.dark_mode,
+              ),
+              onPressed: () {
+                homeController.toggleTheme();
+              },
+            ),
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            children: [
             CustomPieChart(
               data: [
                 PieChartItem(
@@ -95,6 +114,7 @@ class _HomeViewState extends State<HomeView> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

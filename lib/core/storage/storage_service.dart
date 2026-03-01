@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class StorageService {
   static const _tokenKey = 'auth_token';
   static const _refreshTokenKey = 'refresh_token';
+  static const _themeKey = 'is_dark_theme';
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
@@ -21,5 +22,13 @@ class StorageService {
   Future<void> clearAuth() async {
     await _storage.delete(key: _tokenKey);
     await _storage.delete(key: _refreshTokenKey);
+  }
+
+  Future<void> saveTheme(bool isDark) =>
+      _storage.write(key: _themeKey, value: isDark.toString());
+
+  Future<bool> isDarkTheme() async {
+    final value = await _storage.read(key: _themeKey);
+    return value == 'true';
   }
 }
